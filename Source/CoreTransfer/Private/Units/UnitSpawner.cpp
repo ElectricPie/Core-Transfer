@@ -57,7 +57,7 @@ void AUnitSpawner::SpawnNextUnit()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("AUnitSpawner: Unit spawned without AI controller"));
-		Destroy(NewActor);
+		NewActor->Destroy();
 	}
 }
 
