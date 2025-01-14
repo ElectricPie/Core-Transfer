@@ -18,6 +18,8 @@ class CORETRANSFER_API AUnitAiController : public AAIController
 public:
 	virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
 	
+	void MoveToNextWaypoint();
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -27,7 +29,5 @@ private:
 	TArray<FVector> WaypointsArray;
 	
 	TQueue<FVector> Waypoints;
-
-private:
-	void MoveToNextWaypoint();
+	
 };
