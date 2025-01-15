@@ -3,10 +3,14 @@
 
 #include "Player/PlayerCore.h"
 
+#include "Components/BoxComponent.h"
+#include "Units/BaseUnit.h"
+#include "Units/UnitCoreHolder.h"
+
 // Sets default values
 APlayerCore::APlayerCore()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
@@ -14,6 +18,9 @@ APlayerCore::APlayerCore()
 
 	CoreHolder = CreateDefaultSubobject<USceneComponent>(TEXT("Core Holder"));
 	CoreHolder->SetupAttachment(MeshComponent);
+
+	CoreCollectionVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("Core Collection Volume"));
+	CoreCollectionVolume->SetupAttachment(RootComponent);
 }
 
 void APlayerCore::Tick(float DeltaSeconds)
@@ -28,6 +35,8 @@ void APlayerCore::Tick(float DeltaSeconds)
 void APlayerCore::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CoreCollectionVolume->OnComponentBeginOverlap.AddDynamic(this, &APlayerCore::OnCollectionVolumeBeginOverlap);
 
 	if (CoreClass == nullptr)
 	{
@@ -46,10 +55,33 @@ void APlayerCore::BeginPlay()
 				OrbDistanceFromCentre * FMath::Cos(Angle),
 				OrbDistanceFromCentre * FMath::Sin(Angle),
 				0);
-			
+
 			NewCore->SetActorLocation(CoreHolder->GetComponentLocation() + Pos);
 			NewCore->AttachToComponent(CoreHolder, FAttachmentTransformRules::KeepWorldTransform);
 			Cores.Add(NewCore);
+		}
+	}
+}
+
+void APlayerCore::OnCollectionVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (Cores.Num() == 0)
+	{
+		return;
+	} 
+	
+	TArray<UUnitCoreHolder*> OtherCoreHolders;
+	OtherActor->GetComponents<UUnitCoreHolder>(OtherCoreHolders);
+
+	for (const auto& OtherCoreHolder : OtherCoreHolders)
+	{
+		if (!OtherCoreHolder->IsHoldingCore())
+		{
+			if (OtherCoreHolder->SetCore(Cores.Last().Get()))
+			{
+				Cores.RemoveAt(Cores.Num() - 1);
+			}
 		}
 	}
 }

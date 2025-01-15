@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "PlayerCore.generated.h"
 
+class UBoxComponent;
+
 UCLASS()
 class CORETRANSFER_API APlayerCore : public AActor
 {
@@ -25,6 +27,8 @@ private:
 	TObjectPtr<UStaticMeshComponent> MeshComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent> CoreHolder;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UBoxComponent> CoreCollectionVolume;
 
 	UPROPERTY(EditAnywhere, meta=(ClampMin=0, UIMin=0))
 	uint32 InitialCoreCount = 10;
@@ -36,4 +40,9 @@ private:
 	TSubclassOf<AActor> CoreClass;
 	UPROPERTY(VisibleAnywhere)
 	TArray<TWeakObjectPtr<AActor>> Cores;
+
+private:
+	UFUNCTION()
+	void OnCollectionVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+										const FHitResult& SweepResult);
 };
