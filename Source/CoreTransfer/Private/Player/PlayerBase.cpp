@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Player/PlayerCore.h"
+#include "Player/PlayerBase.h"
 
 #include "Components/BoxComponent.h"
 #include "Units/BaseUnit.h"
 #include "Units/UnitCoreHolder.h"
 
 // Sets default values
-APlayerCore::APlayerCore()
+APlayerBase::APlayerBase()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -23,7 +23,7 @@ APlayerCore::APlayerCore()
 	CoreCollectionVolume->SetupAttachment(RootComponent);
 }
 
-void APlayerCore::Tick(float DeltaSeconds)
+void APlayerBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
@@ -32,11 +32,11 @@ void APlayerCore::Tick(float DeltaSeconds)
 	CoreHolder->SetWorldRotation(NewRotation);
 }
 
-void APlayerCore::BeginPlay()
+void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CoreCollectionVolume->OnComponentBeginOverlap.AddDynamic(this, &APlayerCore::OnCollectionVolumeBeginOverlap);
+	CoreCollectionVolume->OnComponentBeginOverlap.AddDynamic(this, &APlayerBase::OnCollectionVolumeBeginOverlap);
 
 	if (CoreClass == nullptr)
 	{
@@ -63,7 +63,7 @@ void APlayerCore::BeginPlay()
 	}
 }
 
-void APlayerCore::OnCollectionVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void APlayerBase::OnCollectionVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (Cores.Num() == 0)

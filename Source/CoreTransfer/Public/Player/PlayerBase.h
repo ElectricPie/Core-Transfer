@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "PlayerCore.generated.h"
+#include "PlayerBase.generated.h"
 
 class UBoxComponent;
 
 UCLASS()
-class CORETRANSFER_API APlayerCore : public AActor
+class CORETRANSFER_API APlayerBase : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	APlayerCore();
+	APlayerBase();
 
 	virtual void Tick(float DeltaSeconds) override;
 
