@@ -3,6 +3,8 @@
 
 #include "Units/UnitCoreHolder.h"
 
+#include "Player/PlayerCore.h"
+
 // Sets default values for this component's properties
 UUnitCoreHolder::UUnitCoreHolder()
 {
@@ -13,7 +15,18 @@ UUnitCoreHolder::UUnitCoreHolder()
 	// ...
 }
 
-bool UUnitCoreHolder::SetCore(AActor* NewCore)
+void UUnitCoreHolder::BeginDestroy()
+{
+	if (Core != nullptr)
+	{
+		Core->ReturnToBase();
+		Core = nullptr;
+	}
+	
+	Super::BeginDestroy();
+}
+
+bool UUnitCoreHolder::SetCore(APlayerCore* NewCore)
 {
 	if (NewCore == nullptr)
 	{

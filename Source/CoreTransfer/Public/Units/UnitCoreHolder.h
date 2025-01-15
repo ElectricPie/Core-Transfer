@@ -7,6 +7,8 @@
 #include "UnitCoreHolder.generated.h"
 
 
+class APlayerCore;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CORETRANSFER_API UUnitCoreHolder : public USceneComponent
 {
@@ -16,17 +18,19 @@ public:
 	// Sets default values for this component's properties
 	UUnitCoreHolder();
 
+	virtual void BeginDestroy() override;
+
 	bool IsHoldingCore() const { return Core.IsValid(); }
 	/**
-	 * Set the core that this holder is holding
+	 * Set and move the core to this
 	 * @param NewCore The core to hold
 	 * @return true if the core was successfully set, false if the holder is already holding a core or the core is
 	 * nullptr
 	 */
 	UFUNCTION(BlueprintCallable)
-	bool SetCore(AActor* NewCore);
+	bool SetCore(APlayerCore* NewCore);
 	
 private:
 	UPROPERTY(VisibleAnywhere)
-	TWeakObjectPtr<AActor> Core;
+	TWeakObjectPtr<APlayerCore> Core;
 };

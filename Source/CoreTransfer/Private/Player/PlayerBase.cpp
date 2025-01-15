@@ -4,7 +4,7 @@
 #include "Player/PlayerBase.h"
 
 #include "Components/BoxComponent.h"
-#include "Units/BaseUnit.h"
+#include "Player/PlayerCore.h"
 #include "Units/UnitCoreHolder.h"
 
 // Sets default values
@@ -32,6 +32,16 @@ void APlayerBase::Tick(float DeltaSeconds)
 	CoreHolder->SetWorldRotation(NewRotation);
 }
 
+void APlayerBase::AddCore(APlayerCore* NewCore)
+{
+	if (NewCore == nullptr)
+		return;
+
+	NewCore->AttachToComponent(CoreHolder, FAttachmentTransformRules::KeepWorldTransform);
+	Cores.Add(NewCore);
+	RepositionAllCores();
+}
+
 void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
@@ -44,36 +54,53 @@ void APlayerBase::BeginPlay()
 		return;
 	}
 
+	// Spawn Initial orbs
 	for (uint32 i = 0; i < InitialCoreCount; ++i)
 	{
-		if (AActor* NewCore = GetWorld()->SpawnActor<AActor>(CoreClass))
+		if (APlayerCore* NewCore = GetWorld()->SpawnActor<APlayerCore>(CoreClass))
 		{
-			// Calculate the position of the orbs in a circle around the core holder
-			float Angle = 360 / InitialCoreCount * i;
-			Angle = 2 * PI * (FMath::Clamp<float>(Angle, 0, 360) / 360);
-			FVector Pos = FVector(
-				OrbDistanceFromCentre * FMath::Cos(Angle),
-				OrbDistanceFromCentre * FMath::Sin(Angle),
-				0);
+			FVector Pos = CalculateCorePosition(InitialCoreCount, i);
 
 			NewCore->SetActorLocation(CoreHolder->GetComponentLocation() + Pos);
 			NewCore->AttachToComponent(CoreHolder, FAttachmentTransformRules::KeepWorldTransform);
+			NewCore->HomeBase = this;
 			Cores.Add(NewCore);
 		}
 	}
 }
 
+FVector APlayerBase::CalculateCorePosition(const uint32 TotalCores, const uint32 CoreIndex) const
+{
+	float Angle = 360 / TotalCores * CoreIndex;
+	Angle = 2 * PI * (FMath::Clamp<float>(Angle, 0, 360) / 360);
+
+	return FVector(
+		OrbDistanceFromCentre * FMath::Cos(Angle),
+		OrbDistanceFromCentre * FMath::Sin(Angle),
+		0);
+}
+
+void APlayerBase::RepositionAllCores()
+{
+	for (int32 i = 0; i < Cores.Num(); ++i)
+	{
+		FVector Pos = CalculateCorePosition(Cores.Num(), i);
+		Cores[i]->SetActorLocation(CoreHolder->GetComponentLocation() + Pos);
+	}
+}
+
 void APlayerBase::OnCollectionVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                 const FHitResult& SweepResult)
 {
 	if (Cores.Num() == 0)
 	{
 		return;
-	} 
-	
+	}
+
+	// Assign cores to passing holders
 	TArray<UUnitCoreHolder*> OtherCoreHolders;
 	OtherActor->GetComponents<UUnitCoreHolder>(OtherCoreHolders);
-
 	for (const auto& OtherCoreHolder : OtherCoreHolders)
 	{
 		if (!OtherCoreHolder->IsHoldingCore())
@@ -81,6 +108,9 @@ void APlayerBase::OnCollectionVolumeBeginOverlap(UPrimitiveComponent* Overlapped
 			if (OtherCoreHolder->SetCore(Cores.Last().Get()))
 			{
 				Cores.RemoveAt(Cores.Num() - 1);
+
+				// Reposition the remaining orbs
+				RepositionAllCores();
 			}
 		}
 	}
