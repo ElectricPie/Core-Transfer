@@ -17,11 +17,7 @@ UUnitCoreHolder::UUnitCoreHolder()
 
 void UUnitCoreHolder::BeginDestroy()
 {
-	if (Core != nullptr)
-	{
-		Core->ReturnToBase();
-		Core = nullptr;
-	}
+	ReturnCore();
 	
 	Super::BeginDestroy();
 }
@@ -43,3 +39,11 @@ bool UUnitCoreHolder::SetCore(APlayerCore* NewCore)
 	return true;
 }
 
+void UUnitCoreHolder::ReturnCore()
+{
+	if (Core != nullptr)
+	{
+		Core->ReturnToBase();
+		Core = nullptr;
+	}
+}

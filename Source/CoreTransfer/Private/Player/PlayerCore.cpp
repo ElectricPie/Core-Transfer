@@ -20,5 +20,9 @@ void APlayerCore::ReturnToBase()
 	{
 		HomeBase->AddCore(this);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("APlayerCore::ReturnToBase: Core home base is null on %s"), *GetName());
+	}
 }
 

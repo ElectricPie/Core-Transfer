@@ -106,7 +106,9 @@ void ATurret::Fire()
 		return;
 	}
 
-	GetWorld()->SpawnActor(ProjectileClass, &ProjectileSpawnPoint->GetComponentTransform());
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	GetWorld()->SpawnActor(ProjectileClass, &ProjectileSpawnPoint->GetComponentTransform(), SpawnParams);
 }
 
 void ATurret::OnUnitDeath(ABaseUnit* DeadUnit)

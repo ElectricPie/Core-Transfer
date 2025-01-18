@@ -3,6 +3,8 @@
 
 #include "Units/BaseUnit.h"
 
+#include "Units/UnitCoreHolder.h"
+
 // Sets default values
 ABaseUnit::ABaseUnit()
 {
@@ -18,6 +20,14 @@ float ABaseUnit::TakeDamage(float DamageAmount, struct FDamageEvent const& Damag
 
 	if (Health <= 0)
 	{
+		// Return any cores to base
+		TArray<UUnitCoreHolder*> CoreHolders;
+		GetComponents<UUnitCoreHolder>(CoreHolders);
+		for (UUnitCoreHolder* CoreHolder : CoreHolders)
+		{
+			CoreHolder->ReturnCore();
+		}
+		
 		OnUnitDeath.Broadcast(this);
 		Destroy();
 	}

@@ -17,8 +17,6 @@ void AUnitAiController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollo
 
 void AUnitAiController::BeginPlay()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Unit AI Controller BeginPlay"));
-	
 	for (FVector Waypoint : WaypointsArray)
 	{
 		Waypoints.Enqueue(Waypoint);

@@ -29,6 +29,8 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	bool SetCore(APlayerCore* NewCore);
+	UFUNCTION(BlueprintCallable)
+	void ReturnCore();
 	
 private:
 	UPROPERTY(VisibleAnywhere)
