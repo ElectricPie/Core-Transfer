@@ -10,3 +10,17 @@ ABaseUnit::ABaseUnit()
 	PrimaryActorTick.bCanEverTick = false;
 	
 }
+
+float ABaseUnit::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator, AActor* DamageCauser)
+{
+	Health -= DamageAmount;
+
+	if (Health <= 0)
+	{
+		OnUnitDeath.Broadcast(this);
+		Destroy();
+	}
+	
+	return DamageAmount;
+}
