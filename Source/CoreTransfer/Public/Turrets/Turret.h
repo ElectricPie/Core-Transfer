@@ -25,6 +25,7 @@ public:
 	ATurret();
 
 	virtual void Tick(float DeltaSeconds) override;
+	void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -49,6 +50,9 @@ private:
 	float FireRate = 1.f;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(Replicated)
+	FVector DirectionToTarget;
 
 private:
 	UFUNCTION()

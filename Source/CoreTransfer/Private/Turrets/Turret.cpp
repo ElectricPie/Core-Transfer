@@ -4,6 +4,7 @@
 #include "Turrets/Turret.h"
 
 #include "Components/SphereComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Units/BaseUnit.h"
 
 // Sets default values
@@ -31,33 +32,47 @@ void ATurret::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Get new target if needed
-	if (CurrentTarget.IsValid() == false && UnitsInRange.IsEmpty() == false)
+	if (HasAuthority())
 	{
-		if (UnitsInRange[0].IsValid() == false)
+		// Get new target if needed
+		if (CurrentTarget.IsValid() == false && UnitsInRange.IsEmpty() == false)
 		{
-			UnitsInRange.Pop();
+			if (UnitsInRange[0].IsValid() == false)
+			{
+				UnitsInRange.Pop();
+			}
+			else
+			{
+				CurrentTarget = UnitsInRange[0];
+			}
 		}
-		else
+	
+		if (CurrentTarget.IsValid())
 		{
-			CurrentTarget = UnitsInRange[0];
+			DirectionToTarget = (CurrentTarget->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+			DirectionToTarget.Z = 0.f;
 		}
 	}
 	
-	if (CurrentTarget.IsValid())
-	{
-	    FVector DirectionToTarget = (CurrentTarget->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-		DirectionToTarget.Z = 0.f;
-		SetActorRotation(DirectionToTarget.Rotation());
-	}
+	SetActorRotation(DirectionToTarget.Rotation());
+}
+
+void ATurret::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATurret, DirectionToTarget);
 }
 
 void ATurret::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RangeVolume->OnComponentBeginOverlap.AddDynamic(this, &ATurret::OnRangedEntered);
-	RangeVolume->OnComponentEndOverlap.AddDynamic(this, &ATurret::OnRangedLeft);
+	if (HasAuthority())
+	{
+		RangeVolume->OnComponentBeginOverlap.AddDynamic(this, &ATurret::OnRangedEntered);
+		RangeVolume->OnComponentEndOverlap.AddDynamic(this, &ATurret::OnRangedLeft);
+	}
 }
 
 
