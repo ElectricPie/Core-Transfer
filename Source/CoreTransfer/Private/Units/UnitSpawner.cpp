@@ -8,7 +8,7 @@
 
 // Sets default values
 AUnitSpawner::AUnitSpawner()
-{
+{	
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -18,8 +18,13 @@ AUnitSpawner::AUnitSpawner()
 	UnitSpawnLocation->SetupAttachment(RootComponent);
 }
 
-void AUnitSpawner::SpawnUnit(const TSubclassOf<ACharacter>& UnitToSpawn)
+void AUnitSpawner::AuthSpawnUnit(const TSubclassOf<ACharacter>& UnitToSpawn)
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
 	if (UnitToSpawn == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("UnitToSpawn is nullptr"));
@@ -30,12 +35,17 @@ void AUnitSpawner::SpawnUnit(const TSubclassOf<ACharacter>& UnitToSpawn)
 
 	if (!SpawnTimerHandle.IsValid())
 	{
-		GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AUnitSpawner::SpawnNextUnit, SpawnInterval, true);
+		GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AUnitSpawner::AuthSpawnNextUnit, SpawnInterval, true);
 	}
 }
 
-void AUnitSpawner::SpawnNextUnit()
+void AUnitSpawner::AuthSpawnNextUnit()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
 	if (SpawnQueue.IsEmpty())
 	{
 		GetWorldTimerManager().ClearTimer(SpawnTimerHandle);

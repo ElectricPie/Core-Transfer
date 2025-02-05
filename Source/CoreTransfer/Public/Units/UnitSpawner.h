@@ -16,7 +16,7 @@ public:
 	AUnitSpawner();
 	
 	UFUNCTION(BlueprintCallable)
-	void SpawnUnit(const TSubclassOf<ACharacter>& UnitToSpawn);
+	void AuthSpawnUnit(const TSubclassOf<ACharacter>& UnitToSpawn);
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -28,5 +28,5 @@ private:
 	FTimerHandle SpawnTimerHandle;
 
 private:
-	void SpawnNextUnit();
+	void AuthSpawnNextUnit();
 };
