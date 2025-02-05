@@ -23,6 +23,8 @@ ATurret::ATurret()
 
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Projectile Spawn Point"));
 	ProjectileSpawnPoint->SetupAttachment(Root);
+
+	bReplicates = true;
 }
 
 void ATurret::Tick(float DeltaSeconds)

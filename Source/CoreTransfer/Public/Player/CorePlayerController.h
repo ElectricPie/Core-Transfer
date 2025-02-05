@@ -50,10 +50,16 @@ private:
 
 	FPreviewBuilding* PreviewBuilding = nullptr;
 
+	UPROPERTY(EditAnywhere)
+	float GridSpacing = 100.f;
+
 private:
 	bool IsBuildingPreviewActive() const { return nullptr != PreviewBuilding; };
 	
 	void Move(const FInputActionValue& InputValue);
 	void CancelBuildingPreview();
 	void ConfirmBuildingPlacement();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerPlaceBuilding(TSubclassOf<AActor> BuildingClass, const FVector& Location);
 };

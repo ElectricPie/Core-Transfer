@@ -11,6 +11,7 @@ void ACorePlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	// Building Preview
 	if (IsBuildingPreviewActive())
 	{
 		if (nullptr == PreviewBuilding->PreviewActor)
@@ -19,7 +20,7 @@ void ACorePlayerController::Tick(float DeltaSeconds)
 			PreviewBuilding = nullptr;
 			return;
 		}
-		
+
 		FVector WorldLocation;
 		FVector WorldDirection;
 		DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
@@ -34,7 +35,12 @@ void ACorePlayerController::Tick(float DeltaSeconds)
 		if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation,
 		                                         ECollisionChannel::ECC_Visibility, CollisionQueryParams))
 		{
-			PreviewBuilding->PreviewActor->SetActorLocation(HitResult.Location);
+			FVector SnappedLocation = FVector(
+				FMath::Floor(HitResult.Location.X / GridSpacing) * GridSpacing,
+				FMath::Floor(HitResult.Location.Y / GridSpacing) * GridSpacing,
+				HitResult.Location.Z
+				);
+			PreviewBuilding->PreviewActor->SetActorLocation(SnappedLocation);
 		}
 	}
 }
@@ -72,6 +78,7 @@ void ACorePlayerController::StartBuildingPreview(TSubclassOf<AActor> BuildingCla
 		                                                            FRotator::ZeroRotator,
 		                                                            SpawnParameters);
 		NewPreviewBuilding->SetActorTickEnabled(false);
+		NewPreviewBuilding->SetReplicates(false);
 		PreviewBuilding = new FPreviewBuilding{NewPreviewBuilding, BuildingClass};
 	}
 }
@@ -130,7 +137,7 @@ void ACorePlayerController::ConfirmBuildingPlacement()
 	{
 		return;
 	}
-	
+
 	if (nullptr == PreviewBuilding->PreviewActor)
 	{
 		return;
@@ -139,10 +146,25 @@ void ACorePlayerController::ConfirmBuildingPlacement()
 	const FVector BuildingSpawnLocation = PreviewBuilding->PreviewActor->GetActorLocation();
 	PreviewBuilding->PreviewActor->Destroy();
 
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	GetWorld()->SpawnActor<AActor>(PreviewBuilding->BuildingClass, BuildingSpawnLocation, FRotator::ZeroRotator,
-	                               SpawnParameters);
+	ServerPlaceBuilding(PreviewBuilding->BuildingClass, BuildingSpawnLocation);
 
 	PreviewBuilding = nullptr;
+}
+
+void ACorePlayerController::ServerPlaceBuilding_Implementation(TSubclassOf<AActor> BuildingClass,
+                                                               const FVector& Location)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	GetWorld()->SpawnActor<AActor>(BuildingClass, Location, FRotator::ZeroRotator, SpawnParameters);
+}
+
+bool ACorePlayerController::ServerPlaceBuilding_Validate(TSubclassOf<AActor> BuildingClass, const FVector& Location)
+{
+	return true;
 }
