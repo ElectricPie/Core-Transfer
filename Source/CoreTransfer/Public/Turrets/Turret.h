@@ -25,7 +25,7 @@ public:
 	ATurret();
 
 	virtual void Tick(float DeltaSeconds) override;
-	void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void GetLifetimeReplicatedProps(TArray<  FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;

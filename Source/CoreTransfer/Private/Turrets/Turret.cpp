@@ -18,9 +18,11 @@ ATurret::ATurret()
 
 	TurretMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Turret Mesh"));
 	TurretMesh->SetupAttachment(Root);
+	TurretMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 
 	RangeVolume = CreateDefaultSubobject<USphereComponent>(TEXT("Range Volume"));
 	RangeVolume->SetupAttachment(Root);
+	RangeVolume->SetSphereRadius(600.f);
 
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Projectile Spawn Point"));
 	ProjectileSpawnPoint->SetupAttachment(Root);
