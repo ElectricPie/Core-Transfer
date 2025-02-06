@@ -10,7 +10,7 @@
 // Sets default values
 ATurret::ATurret()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -48,14 +48,14 @@ void ATurret::Tick(float DeltaSeconds)
 				CurrentTarget = UnitsInRange[0];
 			}
 		}
-	
+
 		if (CurrentTarget.IsValid())
 		{
 			DirectionToTarget = (CurrentTarget->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 			DirectionToTarget.Z = 0.f;
 		}
 	}
-	
+
 	SetActorRotation(DirectionToTarget.Rotation());
 }
 
@@ -79,7 +79,8 @@ void ATurret::BeginPlay()
 
 
 void ATurret::OnRangedEntered(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                              const FHitResult& SweepResult)
 {
 	// TODO: Handle teams if needed
 	if (ABaseUnit* Unit = Cast<ABaseUnit>(OtherActor))
@@ -93,13 +94,13 @@ void ATurret::OnRangedEntered(UPrimitiveComponent* OverlappedComponent, AActor* 
 		if (!CurrentTarget.IsValid())
 		{
 			CurrentTarget = Unit;
-			GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATurret::Fire, FireRate, true);
+			GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATurret::Multicast_Fire, FireRate, true);
 		}
 	}
 }
 
 void ATurret::OnRangedLeft(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
+                           int32 OtherBodyIndex)
 {
 	if (ABaseUnit* Unit = Cast<ABaseUnit>(OtherActor))
 	{
@@ -117,7 +118,7 @@ void ATurret::OnRangedLeft(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 	}
 }
 
-void ATurret::Fire()
+void ATurret::Multicast_Fire_Implementation()
 {
 	if (ProjectileClass == nullptr)
 	{
@@ -167,4 +168,3 @@ ABaseUnit* ATurret::GetNextValidUnit()
 
 	return nullptr;
 }
-

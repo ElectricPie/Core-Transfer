@@ -60,8 +60,8 @@ private:
 	UFUNCTION()
 	void OnRangedLeft(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
-	
-	void Fire();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Fire();
 	
 	UFUNCTION()
 	void OnUnitDeath(ABaseUnit* DeadUnit);
