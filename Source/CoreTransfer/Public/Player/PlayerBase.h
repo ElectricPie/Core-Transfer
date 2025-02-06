@@ -19,7 +19,7 @@ public:
 	APlayerBase();
 
 	virtual void Tick(float DeltaSeconds) override;
-
+	
 	void AddCore(APlayerCore* NewCore);
 
 protected:
@@ -44,7 +44,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TArray<TWeakObjectPtr<APlayerCore>> Cores;
 
-
 private:
 	/**
 	 * Calculates the position of a core so that it is positioned evenly around the CoreHolder relative to the total
@@ -58,7 +57,8 @@ private:
 	/**
 	 * Moves all cores to be in their correct position relative to the number of cores
 	 */
-	void RepositionAllCores();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_RepositionAllCores();
 	
 	UFUNCTION()
 	void OnCollectionVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,

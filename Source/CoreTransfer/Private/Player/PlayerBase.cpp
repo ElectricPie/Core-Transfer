@@ -4,6 +4,7 @@
 #include "Player/PlayerBase.h"
 
 #include "Components/BoxComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Player/PlayerCore.h"
 #include "Units/UnitCoreHolder.h"
 
@@ -21,6 +22,8 @@ APlayerBase::APlayerBase()
 
 	CoreCollectionVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("Core Collection Volume"));
 	CoreCollectionVolume->SetupAttachment(RootComponent);
+
+	bReplicates = true;
 }
 
 void APlayerBase::Tick(float DeltaSeconds)
@@ -34,17 +37,25 @@ void APlayerBase::Tick(float DeltaSeconds)
 
 void APlayerBase::AddCore(APlayerCore* NewCore)
 {
-	if (NewCore == nullptr)
-		return;
+	if (HasAuthority())
+	{
+		if (NewCore == nullptr)
+			return;
 
-	NewCore->AttachToComponent(CoreHolder, FAttachmentTransformRules::KeepWorldTransform);
-	Cores.Add(NewCore);
-	RepositionAllCores();
+		NewCore->AttachToComponent(CoreHolder, FAttachmentTransformRules::KeepWorldTransform);
+		Cores.Add(NewCore);
+		Multicast_RepositionAllCores();
+	}
 }
 
 void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!HasAuthority())
+	{
+		return;
+	}
 
 	CoreCollectionVolume->OnComponentBeginOverlap.AddDynamic(this, &APlayerBase::OnCollectionVolumeBeginOverlap);
 
@@ -80,7 +91,7 @@ FVector APlayerBase::CalculateCorePosition(const uint32 TotalCores, const uint32
 		0);
 }
 
-void APlayerBase::RepositionAllCores()
+void APlayerBase::Multicast_RepositionAllCores_Implementation()
 {
 	for (int32 i = 0; i < Cores.Num(); ++i)
 	{
@@ -110,7 +121,7 @@ void APlayerBase::OnCollectionVolumeBeginOverlap(UPrimitiveComponent* Overlapped
 				Cores.RemoveAt(Cores.Num() - 1);
 
 				// Reposition the remaining orbs
-				RepositionAllCores();
+				Multicast_RepositionAllCores();
 			}
 		}
 	}

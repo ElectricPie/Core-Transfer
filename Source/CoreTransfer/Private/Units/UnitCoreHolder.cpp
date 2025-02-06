@@ -17,18 +17,24 @@ UUnitCoreHolder::UUnitCoreHolder()
 
 void UUnitCoreHolder::BeginDestroy()
 {
-	ReturnCore();
-	
+	if (GetOwner()->HasAuthority())
+	{
+		ReturnCore();
+	}
+
 	Super::BeginDestroy();
 }
 
 bool UUnitCoreHolder::SetCore(APlayerCore* NewCore)
 {
+	if (!GetOwner()->HasAuthority())
+	{
+		return false;
+	}
 	if (NewCore == nullptr)
 	{
 		return false;
 	}
-	
 	if (IsHoldingCore())
 	{
 		return false;
@@ -41,9 +47,12 @@ bool UUnitCoreHolder::SetCore(APlayerCore* NewCore)
 
 void UUnitCoreHolder::ReturnCore()
 {
-	if (Core != nullptr)
+	if (GetOwner()->HasAuthority())
 	{
-		Core->ReturnToBase();
-		Core = nullptr;
+		if (Core != nullptr)
+		{
+			Core->ReturnToBase();
+			Core = nullptr;
+		}
 	}
 }
